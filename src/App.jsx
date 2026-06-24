@@ -31,7 +31,6 @@ const HERO_METRICS = [
 
 const PROTECTED_TABS = new Set(["questions", "mock", "feedback", "progress", "portfolio", "daily"])
 
-// ─── Lock Overlay — shown on protected pages when not logged in ──────
 function LockOverlay({ setShowAuth }) {
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#2b1014]/80 backdrop-blur-md rounded-3xl">
@@ -48,7 +47,6 @@ function LockOverlay({ setShowAuth }) {
   )
 }
 
-// ─── Wraps a feature page: blurred + locked when logged out ──────────
 function ProtectedPage({ user, setShowAuth, children }) {
   return (
     <div className="relative">
@@ -79,7 +77,7 @@ function FeatureCard({ feature, onClick, index }) {
   );
 }
 
-function HomePage({ onNavigate, field, setField }) {
+function HomePage({ onNavigate, field, setField, user, setShowAuth }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -133,11 +131,6 @@ function HomePage({ onNavigate, field, setField }) {
                 className="group relative px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 text-white text-base font-bold shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 overflow-hidden">
                 <span className="relative z-10 flex items-center gap-2">🎙️ Start Mock Interview</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </button>
-              <button
-                onClick={() => onNavigate("feedback")}
-                className="px-10 py-4 rounded-2xl border border-white/15 bg-white/5 text-white text-base font-semibold hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-300 hover:scale-105 transition-all duration-300">
-                🤖 Explore AI Feedback
               </button>
             </div>
 
@@ -195,10 +188,6 @@ function HomePage({ onNavigate, field, setField }) {
         </div>
 
         <div className="mt-16 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-semibold mb-8 tracking-widest uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-            Ready to build confidence faster
-          </div>
           <div className="flex flex-wrap items-center justify-center gap-6 text-white/30 text-xs font-medium">
             {["✅ Free to use", "⚡ Instant AI feedback", "🔒 Secure login", "🎯 Role-based challenges"].map((badge, i) => (
               <span key={i} className="hover:text-white/60 transition-colors">{badge}</span>
@@ -236,7 +225,7 @@ function HomePage({ onNavigate, field, setField }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((f, i) => (
-            <FeatureCard key={i} feature={f} index={i} onClick={() => setTab(f.tab)} />
+            <FeatureCard key={i} feature={f} index={i} onClick={() => onNavigate(f.tab)} />
           ))}
         </div>
       </div>
@@ -254,13 +243,9 @@ function HomePage({ onNavigate, field, setField }) {
             </h2>
             <p className="text-white/50 text-base mb-8 max-w-md mx-auto">Start practicing today — it's free, instant, and AI-powered.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => user ? setTab("mock") : setShowAuth(true)}
+              <button onClick={() => onNavigate("mock")}
                 className="px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 text-white font-bold text-base shadow-xl shadow-orange-500/30 hover:scale-105 transition-all duration-300">
                 🎙️ Start Mock Interview
-              </button>
-              <button onClick={() => user ? setTab("feedback") : setShowAuth(true)}
-                className="px-10 py-4 rounded-2xl border border-white/15 bg-white/5 text-white font-semibold text-base hover:border-orange-400/50 hover:text-orange-300 hover:scale-105 transition-all duration-300">
-                🤖 Try AI Feedback
               </button>
             </div>
           </div>
@@ -274,11 +259,11 @@ function HomePage({ onNavigate, field, setField }) {
             <span className="text-white font-bold text-lg">PrepAI 🚀</span>
           </div>
           <p className="text-white/20 text-sm text-center">
-            Built with ❤️ by Tanya • Powered by Groq AI • Open Source
+            Designed & Developed by Tanya Shivhare • AI-Powered Interview Preparation Platform
           </p>
           <div className="flex items-center gap-5">
             {["Questions", "Mock Interview", "Feedback", "Progress"].map((t, i) => (
-              <button key={i} onClick={() => setTab(["questions","mock","feedback","progress"][i])}
+              <button key={i} onClick={() => onNavigate(["questions","mock","feedback","progress"][i])}
                 className="text-white/30 text-xs hover:text-white transition-colors">
                 {t}
               </button>
@@ -298,6 +283,9 @@ export default function App() {
 
   const NAV_TABS = ["home","questions","mock","feedback","progress","portfolio","daily"]
   const NAV_LABELS = ["Home","Questions","Mock Interview","Feedback","Progress","Portfolio","Daily Challenge"]
+
+  const PROTECTED_TABS = new Set(["questions", "mock", "feedback", "progress", "portfolio", "daily"])
+
   const navigateToTab = (nextTab) => {
     if (PROTECTED_TABS.has(nextTab) && !user) {
       setShowAuth(true)
@@ -339,7 +327,7 @@ export default function App() {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       <div className={tab === "home" ? "" : "max-w-4xl mx-auto px-6 py-12"}>
-        {tab === "home" && <HomePage onNavigate={navigateToTab} field={field} setField={setField} />}
+        {tab === "home" && <HomePage onNavigate={navigateToTab} field={field} setField={setField} user={user} setShowAuth={setShowAuth} />}
 
         {tab === "questions" && (
           <div className="bg-[#3a1a1f] border border-white/10 rounded-3xl p-8 text-white relative">
